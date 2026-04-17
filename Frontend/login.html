@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Auth System</title>
+
+<style>
+body{
+    font-family:Arial;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(to right,#2c7be5,#6ea8ff);
+}
+
+.box{
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    width:320px;
+}
+
+input,select,button{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+}
+
+button{
+    background:#2c7be5;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+.toggle{
+    text-align:center;
+    color:#2c7be5;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2 id="title">Login</h2>
+
+<!-- LOGIN -->
+<div id="loginBox">
+    <input id="loginEmail" type="email" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<!-- REGISTER -->
+<div id="registerBox" style="display:none;">
+    <input id="regUsername" placeholder="Username">
+    <input id="regEmail" type="email" placeholder="Email">
+    <input id="regPassword" type="password" placeholder="Password">
+
+    <select id="regRole">
+        <option value="Patient">Patient</option>
+        <option value="Doctor">Doctor</option>
+    </select>
+
+    <button onclick="register()">Register</button>
+</div>
+
+<div class="toggle" onclick="toggle()">
+    Switch Login / Register
+</div>
+
+</div>
+
+<script>
+
+let isLogin = true;
+
+function toggle(){
+    isLogin = !isLogin;
+
+    document.getElementById("loginBox").style.display = isLogin ? "block" : "none";
+    document.getElementById("registerBox").style.display = isLogin ? "none" : "block";
+    document.getElementById("title").innerText = isLogin ? "Login" : "Register";
+}
+
+//
+// ================= REGISTER =================
+//
+async function register(){
+
+    const data = {
+        username: document.getElementById("regUsername").value.trim(),
+        email: document.getElementById("regEmail").value.trim(),
+        password: document.getElementById("regPassword").value.trim(),
+        role: document.getElementById("regRole").value
+    };
+
+    // validation
+    if(!data.username || !data.email || !data.password){
+        alert("Please fill all fields");
+        return;
+    }
+
+    try {
+        const res = await fetch("https://your-backend-name.onrender.com/api/auth/register", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        alert(result.message || result.error || "Registration done");
+
+        if(res.ok){
+            toggle();
+        }
+
+    } catch (err) {
+        alert("Server error");
+        console.log(err);
+    }
+}
+
+//
+// ================= LOGIN =================
+//
+async function login(){
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+
+    if(!email || !password){
+        alert("Please fill all fields");
+        return;
+    }
+
+    try {
+        const res = await fetch("https://your-backend-name.onrender.com/api/auth/login", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        console.log("LOGIN RESPONSE:", data);
+
+
+        if(!res.ok || !data.token){
+            alert(data.message || "Login failed");
+            return;
+        }
+
+        localStorage.setItem("token", data.token);
+
+        // store user too
+        if(data.user){
+            localStorage.setItem("user", JSON.stringify(data.user));
+        }
+
+        alert("Login successful");
+
+        window.location.href = "appointment.html";
+
+    } catch (err) {
+        alert("Server not reachable");
+        console.log(err);
+    }
+}
+
+</script>
+
+</body>
+</html>

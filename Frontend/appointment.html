@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointments</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+}
+
+header {
+    background: #2c7be5;
+    color: white;
+    padding: 15px 50px;
+    display: flex;
+    justify-content: space-between;
+}
+
+nav a {
+    color: white;
+    margin-left: 20px;
+    text-decoration: none;
+}
+
+.container {
+    padding: 40px;
+}
+
+.wrapper {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.form-box, .table-box {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.form-box {
+    width: 320px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    background: #2c7be5;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #2c7be5;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>HospitalMS</h2>
+    <nav>
+        <a href="home.html">Home</a>
+    </nav>
+</header>
+
+<div class="container">
+<h1>Book Appointment</h1>
+
+<div class="wrapper">
+
+<!-- FORM -->
+<div class="form-box">
+<h3>New Appointment</h3>
+
+<form id="appointmentForm">
+<input type="text" id="name" placeholder="Patient Name" required>
+
+<select id="doctor" required>
+<option value="">Select Doctor</option>
+<option>Dr. Sharma</option>
+<option>Dr. Khan</option>
+<option>Dr. Mehta</option>
+</select>
+
+<input type="date" id="date" required>
+<input type="time" id="time" required>
+
+<button type="submit">Book Appointment</button>
+</form>
+</div>
+
+<!-- TABLE -->
+<div class="table-box">
+<h3>Appointments</h3>
+
+<table id="appointmentTable">
+<tr>
+<th>Name</th>
+<th>Doctor</th>
+<th>Date</th>
+<th>Time</th>
+<th>Action</th>
+</tr>
+</table>
+</div>
+
+</div>
+</div>
+
+<script>
+
+//  LOGIN CHECK
+const token = localStorage.getItem("token");
+
+if (!token || token === "undefined" || token === "null") {
+    alert("Please login first");
+    window.location.href = "login.html";
+}
+
+//  BOOK APPOINTMENT
+document.getElementById("appointmentForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const data = {
+        name: document.getElementById("name").value,
+        doctor: document.getElementById("doctor").value,
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value
+    };
+
+    const res = await fetch("http://localhost:5000/api/appointments", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    alert(result.message || "Appointment Booked");
+
+    document.getElementById("appointmentForm").reset();
+    loadAppointments();
+});
+
+//  LOAD APPOINTMENTS
+async function loadAppointments() {
+
+    const res = await fetch("http://localhost:5000/api/appointments", {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    const data = await res.json();
+
+    const table = document.getElementById("appointmentTable");
+
+    table.innerHTML = `
+        <tr>
+            <th>Name</th>
+            <th>Doctor</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Action</th>
+        </tr>
+    `;
+
+    data.forEach(app => {
+        const row = table.insertRow();
+
+        row.innerHTML = `
+            <td>${app.name}</td>
+            <td>${app.doctor}</td>
+            <td>${app.date}</td>
+            <td>${app.time}</td>
+            <td>
+                <button onclick="cancelAppointment(${app.id})">Cancel</button>
+            </td>
+        `;
+    });
+}
+
+//  CANCEL Appointment
+async function cancelAppointment(id) {
+    await fetch(`http://localhost:5000/api/appointments/cancel/${id}`, {
+        method: "PUT",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    loadAppointments();
+}
+
+// first load
+loadAppointments();
+
+</script>
+
+</body>
+</html>

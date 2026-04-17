@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+        }
+
+        header {
+            background: #2c7be5;
+            color: white;
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-weight: 500;
+        }
+
+        nav a {
+            color: white;
+            margin-left: 20px;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .hero {
+            height: 80vh;
+            background: linear-gradient(rgba(44,123,229,0.7), rgba(44,123,229,0.7)),
+                        url('background image.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .hero button {
+            padding: 12px 25px;
+            border: none;
+            background: white;
+            color: #2c7be5;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .hero button:hover {
+            background: #e6e6e6;
+        }
+
+        .section {
+            padding: 50px;
+            text-align: center;
+        }
+
+        .section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .features {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            width: 250px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            color: #2c7be5;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .about {
+            background: #ffffff;
+        }
+
+        footer {
+            background: #2c7be5;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <h2>HospitalMS</h2>
+        <nav>
+            <a href="login.html">Login</a>
+            <a href="contact us.html">Contact Us</a>
+            <a href="doctor.html">Doctors</a>
+            
+            
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div>
+            <h1>Smart Hospital Management System</h1>
+            <p>Making healthcare management simple, fast and reliable</p>
+           <button onclick="window.location.href='login.html'">
+    Book Appointment
+</button>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="section">
+        <h2>Our Features</h2>
+        <div class="features">
+            <div class="card">
+                <h3>Patient Records</h3>
+                <p>Store and manage patient data securely in one place.</p>
+            </div>
+            <div class="card">
+                <h3>Doctor Management</h3>
+                <p>Manage doctor schedules and availability easily.</p>
+            </div>
+            <div class="card">
+                <h3>Appointments</h3>
+                <p>Book and track appointments without confusion.</p>
+            </div>
+            <div class="card">
+                <h3>Secure Login</h3>
+                <p>Authentication system using JWT for safety.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- About -->
+    <div class="section about">
+        <h2>About This System</h2>
+        <p style="max-width: 700px; margin: auto; color:#555;">
+            This hospital management system is developed to reduce manual work and improve efficiency.
+            It helps hospitals manage patients, doctors, and appointments in a simple and organized way.
+            The system is user-friendly and designed to handle real-world hospital needs.
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 Hospital Management System | Designed for better healthcare</p>
+    </footer>
+
+</body>
+</html>

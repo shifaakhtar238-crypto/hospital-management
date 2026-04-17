@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctors</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+}
+
+header {
+    background: #2c7be5;
+    color: white;
+    padding: 15px 50px;
+    display: flex;
+    justify-content: space-between;
+}
+
+nav a {
+    color: white;
+    margin-left: 20px;
+    text-decoration: none;
+}
+
+.container {
+    padding: 50px;
+    text-align: center;
+}
+
+.doctors {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    width: 250px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    border: none;
+    background: #2c7be5;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1a5ed8;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <h2>HospitalMS</h2>
+    <nav>
+        <a href="Home page.html">Home</a>
+        <a href="login.html">Login to Book Appointment</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h1>Our Doctors</h1>
+
+    <div class="doctors">
+
+        <div class="card">
+            <img src="https://cdn-icons-png.flaticon.com/512/3774/3774299.png">
+            <h3>Dr. Sharma</h3>
+            <p>Cardiologist</p>
+            <a href="login.html">
+                <button>Book Appointment</button>
+            </a>
+        </div>
+
+        <div class="card">
+            <img src="https://cdn-icons-png.flaticon.com/512/3774/3774299.png">
+            <h3>Dr. Khan</h3>
+            <p>Neurologist</p>
+            <a href="login.html">
+                <button>Book Appointment</button>
+            </a>
+        </div>
+
+        <div class="card">
+            <img src="https://cdn-icons-png.flaticon.com/512/3774/3774299.png">
+            <h3>Dr. Mehta</h3>
+            <p>Orthopedic</p>
+            <a href="login.html">
+                <button>Book Appointment</button>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
