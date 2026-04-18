@@ -1,76 +1,129 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
+const supabase = require("../supabaseClient");
 const verifyToken = require("../middleware/auth");
 
-/* ================= GET ================= */
-router.get("/", verifyToken, (req, res) => {
 
-    const userId = req.user.id;
+// ================= GET APPOINTMENTS =================
+router.get("/", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
 
-    db.query(
-        "SELECT * FROM appointments WHERE user_id = ?",
-        [userId],
-        (err, result) => {
-            if (err) return res.status(500).json({ message: "Database error" });
+        const { data, error } = await supabase
+            .from("appointment")
+            .select("*")
+            .eq("patient_id", userId);
 
-            res.json(result);
+        if (error) {
+            return res.status(500).json({ message: "Database error", error });
         }
-    );
-});
 
-/* ================= BOOK ================= */
-router.post("/", verifyToken, (req, res) => {
+        res.json(data || []);
 
-    const { name, doctor, date, time } = req.body;
-    const userId = req.user.id;   //  FROM JWT
-
-    db.query(
-        "INSERT INTO appointments (user_id, name, doctor, date, time, status) VALUES (?, ?, ?, ?, ?, ?)",
-        [userId, name, doctor, date, time, "Pending"],
-        (err) => {
-            if (err) return res.status(500).json({ message: "Insert error" });
-
-            res.json({ message: "Appointment booked successfully" });
-        }
-    );
-});
-
-/* ================= CANCEL ================= */
-router.put("/cancel/:id", verifyToken, (req, res) => {
-
-    const { id } = req.params;
-
-    db.query(
-        "UPDATE appointments SET status = ? WHERE id = ?",
-        ["Cancelled", id],
-        (err) => {
-            if (err) return res.status(500).json({ message: "Cancel error" });
-
-            res.json({ message: "Appointment cancelled" });
-        }
-    );
-});
-
-/* ================= RESCHEDULE ================= */
-router.put("/reschedule/:id", verifyToken, (req, res) => {
-
-    const { id } = req.params;
-    const { date, time } = req.body;
-
-    if (!date || !time) {
-        return res.status(400).json({ message: "Date and time required" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
     }
+});
 
-    db.query(
-        "UPDATE appointments SET date = ?, time = ?, status = ? WHERE id = ?",
-        [date, time, "Rescheduled", id],
-        (err) => {
-            if (err) return res.status(500).json({ message: "Reschedule error" });
 
-            res.json({ message: "Appointment rescheduled" });
+// ================= BOOK APPOINTMENT =================
+router.post("/", verifyToken, async (req, res) => {
+    try {
+        const { name, date, time } = req.body;
+        const userId = req.user.id;
+
+        // ✅ validation FIX
+        if (!name || !date || !time) {
+            return res.status(400).json({ message: "All fields required" });
         }
-    );
+
+        const { data, error } = await supabase
+            .from("appointment")
+            .insert([
+                {
+                    patient_id: userId,
+                    name,
+                    date,
+                    time,
+                    status: "pending"
+                }
+            ])
+            .select();
+
+        if (error) {
+            return res.status(500).json({ message: "Insert error", error });
+        }
+
+        res.json({
+            message: "Appointment booked successfully",
+            data
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+
+// ================= CANCEL APPOINTMENT =================
+router.put("/cancel/:id", verifyToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        const { error } = await supabase
+            .from("appointment")
+            .update({ status: "cancelled" })
+            .eq("id", id)
+            .eq("patient_id", userId);
+
+        if (error) {
+            return res.status(500).json({ message: "Cancel error", error });
+        }
+
+        res.json({ message: "Appointment cancelled" });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+
+// ================= RESCHEDULE =================
+router.put("/reschedule/:id", verifyToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { date, time } = req.body;
+        const userId = req.user.id;
+
+        // ✅ validation FIX
+        if (!date || !time) {
+            return res.status(400).json({ message: "Date and time required" });
+        }
+
+        const { error } = await supabase
+            .from("appointment")
+            .update({
+                date,
+                time,
+                status: "rescheduled"
+            })
+            .eq("id", id)
+            .eq("patient_id", userId);
+
+        if (error) {
+            return res.status(500).json({ message: "Reschedule error", error });
+        }
+
+        res.json({ message: "Appointment rescheduled" });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
+    }
 });
 
 module.exports = router;
