@@ -80,12 +80,13 @@ function toggle(){
     document.getElementById("title").innerText = isLogin ? "Login" : "Register";
 }
 
+
 // ================= REGISTER =================
 async function register(){
 
     const data = {
-        name: document.getElementById("regName").value,
-        email: document.getElementById("regEmail").value,
+        name: document.getElementById("regName").value.trim(),
+        email: document.getElementById("regEmail").value.trim(),
         password: document.getElementById("regPassword").value,
         role: document.getElementById("regRole").value
     };
@@ -95,42 +96,68 @@ async function register(){
         return;
     }
 
-    const res = await fetch(`${BASE_URL}/api/auth/register`, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(data)
-    });
+    try {
+        const res = await fetch(`${BASE_URL}/api/auth/register`, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(data)
+        });
 
-    const result = await res.json();
+        const result = await res.json();
 
-    alert(result.message);
+        if(!res.ok){
+            alert(result.message || "Registration failed");
+            return;
+        }
+
+        alert(result.message || "Registered Successfully");
+
+        // auto switch to login
+        toggle();
+
+    } catch (err) {
+        alert("Server not reachable");
+        console.log(err);
+    }
 }
+
 
 // ================= LOGIN =================
 async function login(){
 
-    const email = document.getElementById("loginEmail").value;
+    const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
 
-    const res = await fetch(`${BASE_URL}/api/auth/login`, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if(!res.ok){
-        alert(data.message);
+    if(!email || !password){
+        alert("Email and password required");
         return;
     }
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    try {
+        const res = await fetch(`${BASE_URL}/api/auth/login`, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify({ email, password })
+        });
 
-    alert("Login Successful");
+        const data = await res.json();
 
-    window.location.href = "appointment.html";
+        if(!res.ok){
+            alert(data.message || "Login failed");
+            return;
+        }
+
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        alert("Login Successful");
+
+        window.location.href = "appointment.html";
+
+    } catch (err) {
+        alert("Server error or backend not running");
+        console.log(err);
+    }
 }
 
 </script>

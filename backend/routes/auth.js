@@ -4,18 +4,24 @@ const supabase = require("../supabaseClient");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+require("dotenv").config();
+
 
 // ================= REGISTER =================
 router.post("/register", async (req, res) => {
     try {
-
-        console.log("BODY RECEIVED:", req.body); // ✔ DEBUG (correct place)
+        console.log("BODY RECEIVED:", req.body);
 
         const { name, email, password, role } = req.body;
 
         // validation
         if (!name || !email || !password || !role) {
             return res.status(400).json({ message: "All fields required" });
+        }
+
+        // check env safety
+        if (!process.env.JWT_SECRET) {
+            return res.status(500).json({ message: "JWT_SECRET missing in environment" });
         }
 
         // check existing user
@@ -25,7 +31,8 @@ router.post("/register", async (req, res) => {
             .eq("email", email);
 
         if (checkError) {
-            return res.status(500).json({ message: "DB error", error: checkError.message });
+            console.log("DB ERROR:", checkError.message);
+            return res.status(500).json({ message: "Database error" });
         }
 
         if (existingUser && existingUser.length > 0) {
@@ -49,7 +56,8 @@ router.post("/register", async (req, res) => {
             .select("id, name, email, role");
 
         if (error) {
-            return res.status(500).json({ message: "Insert error", error: error.message });
+            console.log("INSERT ERROR:", error.message);
+            return res.status(500).json({ message: "Insert error" });
         }
 
         res.status(201).json({
@@ -58,7 +66,7 @@ router.post("/register", async (req, res) => {
         });
 
     } catch (err) {
-        console.log(err);
+        console.log("REGISTER ERROR:", err.message);
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -73,32 +81,44 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ message: "Email and password required" });
         }
 
+        if (!process.env.JWT_SECRET) {
+            return res.status(500).json({ message: "JWT_SECRET not configured" });
+        }
+
         const { data: user, error } = await supabase
             .from("patient")
             .select("*")
             .eq("email", email)
-            .maybeSingle();
+            .single();
 
         if (error) {
-            return res.status(500).json({ message: "DB error", error: error.message });
+            console.log("DB ERROR:", error.message);
+            return res.status(500).json({ message: "Database error" });
         }
 
         if (!user) {
             return res.status(400).json({ message: "User not found" });
         }
 
+        if (!user.password) {
+            return res.status(500).json({ message: "Password missing in DB" });
+        }
+
+        // compare password
         const isValid = await bcrypt.compare(password, user.password);
 
         if (!isValid) {
             return res.status(400).json({ message: "Invalid password" });
         }
 
+        // generate token
         const token = jwt.sign(
             { id: user.id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: "1d" }
         );
 
+        // remove password
         const { password: _, ...safeUser } = user;
 
         res.json({
@@ -107,7 +127,7 @@ router.post("/login", async (req, res) => {
         });
 
     } catch (err) {
-        console.log(err);
+        console.log("LOGIN ERROR:", err.message);
         res.status(500).json({ message: "Server error" });
     }
 });

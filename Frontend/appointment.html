@@ -25,12 +25,15 @@ th{background:#2c7be5;color:white;}
 <div class="box">
 <form id="form">
 <input id="name" placeholder="Name">
+
 <select id="doctor">
-<option>Dr. Sharma</option>
-<option>Dr. Khan</option>
+<option value="Dr. Sharma">Dr. Sharma</option>
+<option value="Dr. Khan">Dr. Khan</option>
 </select>
+
 <input type="date" id="date">
 <input type="time" id="time">
+
 <button type="submit">Book</button>
 </form>
 </div>
@@ -62,66 +65,99 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     e.preventDefault();
 
     const data = {
-        name: document.getElementById("name").value,
+        name: document.getElementById("name").value.trim(),
         doctor: document.getElementById("doctor").value,
         date: document.getElementById("date").value,
         time: document.getElementById("time").value
     };
 
-    const res = await fetch(`${BASE_URL}/api/appointments`, {
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json",
-            "Authorization":"Bearer "+token
-        },
-        body: JSON.stringify(data)
-    });
+    if(!data.name || !data.date || !data.time){
+        alert("All fields required");
+        return;
+    }
 
-    const result = await res.json();
-    alert(result.message);
+    try {
+        const res = await fetch(`${BASE_URL}/api/appointments`, {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json",
+                "Authorization":"Bearer "+token
+            },
+            body: JSON.stringify(data)
+        });
 
-    load();
+        const result = await res.json();
+
+        if(!res.ok){
+            alert(result.message || "Booking failed");
+            return;
+        }
+
+        alert(result.message || "Booked Successfully");
+
+        document.getElementById("form").reset();
+
+        load();
+
+    } catch (err) {
+        alert("Server error");
+        console.log(err);
+    }
 });
+
 
 // ================= LOAD =================
 async function load(){
 
-    const res = await fetch(`${BASE_URL}/api/appointments`, {
-        headers:{ "Authorization":"Bearer "+token }
-    });
+    try {
+        const res = await fetch(`${BASE_URL}/api/appointments`, {
+            headers:{ "Authorization":"Bearer "+token }
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    const table = document.getElementById("table");
+        const table = document.getElementById("table");
 
-    table.innerHTML = `
-    <tr>
-    <th>Name</th><th>Doctor</th><th>Date</th><th>Time</th><th>Action</th>
-    </tr>
-    `;
-
-    data.forEach(a=>{
-        table.innerHTML += `
+        table.innerHTML = `
         <tr>
-        <td>${a.name}</td>
-        <td>${a.doctor || "N/A"}</td>
-        <td>${a.date}</td>
-        <td>${a.time}</td>
-        <td><button onclick="cancel(${a.id})">Cancel</button></td>
+        <th>Name</th><th>Doctor</th><th>Date</th><th>Time</th><th>Action</th>
         </tr>
         `;
-    });
+
+        if(!Array.isArray(data)) return;
+
+        data.forEach(a=>{
+            table.innerHTML += `
+            <tr>
+            <td>${a.name}</td>
+            <td>${a.doctor || "N/A"}</td>
+            <td>${a.date}</td>
+            <td>${a.time}</td>
+            <td><button onclick="cancelAppointment(${a.id})">Cancel</button></td>
+            </tr>
+            `;
+        });
+
+    } catch (err) {
+        console.log(err);
+    }
 }
 
+
 // ================= CANCEL =================
-async function cancel(id){
+async function cancelAppointment(id){
 
-    await fetch(`${BASE_URL}/api/appointments/cancel/${id}`, {
-        method:"PUT",
-        headers:{ "Authorization":"Bearer "+token }
-    });
+    try {
+        await fetch(`${BASE_URL}/api/appointments/cancel/${id}`, {
+            method:"PUT",
+            headers:{ "Authorization":"Bearer "+token }
+        });
 
-    load();
+        load();
+
+    } catch (err) {
+        console.log(err);
+    }
 }
 
 load();

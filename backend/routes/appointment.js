@@ -15,13 +15,14 @@ router.get("/", verifyToken, async (req, res) => {
             .eq("patient_id", userId);
 
         if (error) {
-            return res.status(500).json({ message: "Database error", error });
+            console.log("GET ERROR:", error);
+            return res.status(500).json({ message: "Database error" });
         }
 
         res.json(data || []);
 
     } catch (err) {
-        console.log(err);
+        console.log("SERVER ERROR:", err.message);
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -33,7 +34,7 @@ router.post("/", verifyToken, async (req, res) => {
         const { name, date, time } = req.body;
         const userId = req.user.id;
 
-        // ✅ validation FIX
+        // validation
         if (!name || !date || !time) {
             return res.status(400).json({ message: "All fields required" });
         }
@@ -52,7 +53,8 @@ router.post("/", verifyToken, async (req, res) => {
             .select();
 
         if (error) {
-            return res.status(500).json({ message: "Insert error", error });
+            console.log("INSERT ERROR:", error);
+            return res.status(500).json({ message: "Insert error" });
         }
 
         res.json({
@@ -61,7 +63,7 @@ router.post("/", verifyToken, async (req, res) => {
         });
 
     } catch (err) {
-        console.log(err);
+        console.log("SERVER ERROR:", err.message);
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -73,20 +75,26 @@ router.put("/cancel/:id", verifyToken, async (req, res) => {
         const { id } = req.params;
         const userId = req.user.id;
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from("appointment")
             .update({ status: "cancelled" })
             .eq("id", id)
-            .eq("patient_id", userId);
+            .eq("patient_id", userId)
+            .select();
 
         if (error) {
-            return res.status(500).json({ message: "Cancel error", error });
+            console.log("CANCEL ERROR:", error);
+            return res.status(500).json({ message: "Cancel error" });
+        }
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({ message: "Appointment not found" });
         }
 
         res.json({ message: "Appointment cancelled" });
 
     } catch (err) {
-        console.log(err);
+        console.log("SERVER ERROR:", err.message);
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -99,12 +107,11 @@ router.put("/reschedule/:id", verifyToken, async (req, res) => {
         const { date, time } = req.body;
         const userId = req.user.id;
 
-        // ✅ validation FIX
         if (!date || !time) {
             return res.status(400).json({ message: "Date and time required" });
         }
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from("appointment")
             .update({
                 date,
@@ -112,16 +119,22 @@ router.put("/reschedule/:id", verifyToken, async (req, res) => {
                 status: "rescheduled"
             })
             .eq("id", id)
-            .eq("patient_id", userId);
+            .eq("patient_id", userId)
+            .select();
 
         if (error) {
-            return res.status(500).json({ message: "Reschedule error", error });
+            console.log("RESCHEDULE ERROR:", error);
+            return res.status(500).json({ message: "Reschedule error" });
+        }
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({ message: "Appointment not found" });
         }
 
         res.json({ message: "Appointment rescheduled" });
 
     } catch (err) {
-        console.log(err);
+        console.log("SERVER ERROR:", err.message);
         res.status(500).json({ message: "Server error" });
     }
 });
