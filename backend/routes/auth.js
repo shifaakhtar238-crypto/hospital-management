@@ -8,14 +8,17 @@ const jwt = require("jsonwebtoken");
 // ================= REGISTER =================
 router.post("/register", async (req, res) => {
     try {
+
+        console.log("BODY RECEIVED:", req.body); // ✔ DEBUG (correct place)
+
         const { name, email, password, role } = req.body;
 
-        // ✅ FIXED validation (strict check)
+        // validation
         if (!name || !email || !password || !role) {
             return res.status(400).json({ message: "All fields required" });
         }
 
-        // check existing user (safe)
+        // check existing user
         const { data: existingUser, error: checkError } = await supabase
             .from("patient")
             .select("id")
@@ -66,12 +69,10 @@ router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // validation
         if (!email || !password) {
             return res.status(400).json({ message: "Email and password required" });
         }
 
-        // get user
         const { data: user, error } = await supabase
             .from("patient")
             .select("*")
@@ -86,21 +87,18 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ message: "User not found" });
         }
 
-        // password check
         const isValid = await bcrypt.compare(password, user.password);
 
         if (!isValid) {
             return res.status(400).json({ message: "Invalid password" });
         }
 
-        // JWT token
         const token = jwt.sign(
             { id: user.id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: "1d" }
         );
 
-        // remove password
         const { password: _, ...safeUser } = user;
 
         res.json({
