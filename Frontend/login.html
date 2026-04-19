@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hospital Login</title>
+
+<style>
+body{
+    font-family:Arial;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(to right,#2c7be5,#6ea8ff);
+}
+
+.box{
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    width:340px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.2);
+}
+
+input,select,button{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+}
+
+button{
+    background:#2c7be5;
+    color:white;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+button:disabled{
+    background:gray;
+}
+
+.switch{
+    background:none;
+    color:#2c7be5;
+    border:none;
+    cursor:pointer;
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2 id="title">Login</h2>
+
+<div id="loginBox">
+    <input id="loginEmail" type="email" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button onclick="login()" id="loginBtn">Login</button>
+</div>
+
+<div id="registerBox" style="display:none;">
+    <input id="regName" placeholder="Name">
+    <input id="regEmail" type="email" placeholder="Email">
+    <input id="regPassword" type="password" placeholder="Password">
+
+    <select id="regRole">
+        <option value="Patient">Patient</option>
+        <option value="Doctor">Doctor</option>
+    </select>
+
+    <button onclick="register()" id="regBtn">Register</button>
+</div>
+
+<button class="switch" onclick="toggle()" id="switchBtn">
+    Switch to Register
+</button>
+
+</div>
+
+<script>
+
+const BASE_URL = "https://hospital-management-d8lo.onrender.com";
+
+// ================= AUTO REDIRECT =================
+if(localStorage.getItem("token")){
+    window.location.href = "appointment.html";
+}
+
+let isLogin = true;
+
+function toggle(){
+    isLogin = !isLogin;
+
+    document.getElementById("loginBox").style.display = isLogin ? "block" : "none";
+    document.getElementById("registerBox").style.display = isLogin ? "none" : "block";
+
+    document.getElementById("title").innerText = isLogin ? "Login" : "Register";
+
+    document.getElementById("switchBtn").innerText = 
+        isLogin ? "Switch to Register" : "Switch to Login";
+}
+
+
+// ================= REGISTER =================
+async function register(){
+
+    const btn = document.getElementById("regBtn");
+    btn.disabled = true;
+    btn.innerText = "Registering...";
+
+    const data = {
+        name: document.getElementById("regName").value.trim(),
+        email: document.getElementById("regEmail").value.trim(),
+        password: document.getElementById("regPassword").value,
+        role: document.getElementById("regRole").value
+    };
+
+    if(!data.name || !data.email || !data.password || !data.role){
+        alert("All fields required");
+        btn.disabled = false;
+        btn.innerText = "Register";
+        return;
+    }
+
+    try {
+        const res = await fetch(`${BASE_URL}/api/auth/register`, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if(!res.ok){
+            alert(result.message || "Registration failed");
+        } else {
+            alert("Registered Successfully");
+            toggle();
+        }
+
+    } catch (err) {
+        alert("Server not reachable");
+        console.log(err);
+    }
+
+    btn.disabled = false;
+    btn.innerText = "Register";
+}
+
+
+// ================= LOGIN =================
+async function login(){
+
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+    btn.innerText = "Logging in...";
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    if(!email || !password){
+        alert("Email and password required");
+        btn.disabled = false;
+        btn.innerText = "Login";
+        return;
+    }
+
+    try {
+        const res = await fetch(`${BASE_URL}/api/auth/login`, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if(!res.ok){
+            alert(data.message || "Login failed");
+        } else {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+
+            alert("Login Successful");
+            window.location.href = "appointment.html";
+        }
+
+    } catch (err) {
+        alert("Server error");
+        console.log(err);
+    }
+
+    btn.disabled = false;
+    btn.innerText = "Login";
+}
+
+</script>
+
+</body>
+</html>
