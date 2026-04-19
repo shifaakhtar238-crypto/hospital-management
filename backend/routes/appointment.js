@@ -12,14 +12,22 @@ router.get("/", verifyToken, async (req, res) => {
         const { data, error } = await supabase
             .from("appointment")
             .select("*")
-            .eq("patient_id", userId);
+            .eq("patient_id", userId)
+            .order("id", { ascending: false });
 
         if (error) {
             console.log("GET ERROR:", error);
             return res.status(500).json({ message: "Database error" });
         }
 
-        res.json(data || []);
+        // ensure safe defaults
+        const safeData = (data || []).map(item => ({
+            ...item,
+            status: item.status || "pending",
+            doctor: item.doctor || "Not Assigned"
+        }));
+
+        res.json(safeData);
 
     } catch (err) {
         console.log("SERVER ERROR:", err.message);
@@ -31,11 +39,11 @@ router.get("/", verifyToken, async (req, res) => {
 // ================= BOOK APPOINTMENT =================
 router.post("/", verifyToken, async (req, res) => {
     try {
-        const { name, date, time } = req.body;
+        const { name, doctor, date, time } = req.body;
         const userId = req.user.id;
 
         // validation
-        if (!name || !date || !time) {
+        if (!name || !doctor || !date || !time) {
             return res.status(400).json({ message: "All fields required" });
         }
 
@@ -45,6 +53,7 @@ router.post("/", verifyToken, async (req, res) => {
                 {
                     patient_id: userId,
                     name,
+                    doctor,
                     date,
                     time,
                     status: "pending"
@@ -57,7 +66,7 @@ router.post("/", verifyToken, async (req, res) => {
             return res.status(500).json({ message: "Insert error" });
         }
 
-        res.json({
+        res.status(201).json({
             message: "Appointment booked successfully",
             data
         });

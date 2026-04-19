@@ -7,14 +7,14 @@ module.exports = function (req, res, next) {
     try {
         const authHeader = req.headers.authorization;
 
-        // 1. Check header exists
+        // Check header exists
         if (!authHeader) {
             return res.status(401).json({
                 message: "Authorization header missing"
             });
         }
 
-        // 2. Validate format: Bearer token
+        // Validate format: Bearer token
         const parts = authHeader.split(" ");
 
         if (parts.length !== 2 || parts[0] !== "Bearer") {
@@ -25,12 +25,11 @@ module.exports = function (req, res, next) {
 
         const token = parts[1];
 
-        // ENV check remove (not needed now)
 
-        // 3. Verify token
+        // Verify token
         const decoded = jwt.verify(token, JWT_SECRET);
 
-        // 4. Attach user to request
+        // Attach user to request
         req.user = decoded;
 
         next();
