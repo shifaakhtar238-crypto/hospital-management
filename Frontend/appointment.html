@@ -11,22 +11,23 @@ body{
     margin:0;
 }
 
-/* TOP BAR */
-.topbar{
+/* HEADER */
+.header{
     display:flex;
-    justify-content:flex-end;
-    padding:15px 30px;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 20px;
 }
 
-/* LOGOUT BUTTON */
+/* LOGOUT BUTTON (SMALL) */
 .logout{
     background:#e74c3c;
     color:white;
     border:none;
-    padding:6px 12px;
-    border-radius:5px;
+    padding:5px 10px;
+    border-radius:4px;
+    font-size:12px;
     cursor:pointer;
-    font-size:13px;
 }
 
 .logout:hover{
@@ -35,34 +36,34 @@ body{
 
 /* CONTAINER */
 .container{
-    padding:20px;
-    max-width:700px;   /* smaller width */
-    margin:auto;
+    max-width:500px;   /* tighter */
+    margin:20px auto;
 }
 
-/* BOX */
+/* CARD */
 .box{
     background:white;
-    padding:18px;
-    border-radius:10px;
-    margin-bottom:20px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:15px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
 /* FORM */
 input,select,button{
     width:100%;
-    padding:9px;
-    margin:6px 0;
-    font-size:14px;
+    padding:8px;
+    margin:5px 0;
+    font-size:13px;
 }
 
+/* MAIN BUTTON */
 button{
     background:#2c7be5;
     color:white;
     border:none;
+    border-radius:4px;
     cursor:pointer;
-    border-radius:5px;
 }
 
 button:hover{
@@ -78,15 +79,15 @@ table{
     width:100%;
     background:white;
     border-collapse:collapse;
-    border-radius:10px;
+    border-radius:8px;
     overflow:hidden;
 }
 
 th,td{
-    padding:8px;
+    padding:7px;
     border-bottom:1px solid #ddd;
     text-align:center;
-    font-size:14px;
+    font-size:13px;
 }
 
 th{
@@ -94,17 +95,18 @@ th{
     color:white;
 }
 
+/* HEADINGS */
 h2,h3{
     text-align:center;
-    margin-bottom:10px;
+    margin:10px 0;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOP RIGHT LOGOUT -->
-<div class="topbar">
+<div class="header">
+    <h3>Appointments</h3>
     <button class="logout" onclick="logout()">Logout</button>
 </div>
 
@@ -132,6 +134,7 @@ h2,h3{
 
 <h3>Your Appointments</h3>
 
+<div class="box">
 <table id="table">
 <tr>
 <th>Name</th>
@@ -141,6 +144,7 @@ h2,h3{
 <th>Action</th>
 </tr>
 </table>
+</div>
 
 </div>
 
@@ -262,7 +266,7 @@ async function load(){
             <td>${a.doctor || "N/A"}</td>
             <td>${a.date}</td>
             <td>${a.time}</td>
-            <td><button onclick="cancelAppointment(${a.id})" style="background:#e74c3c;">Cancel</button></td>
+            <td><button onclick="cancelAppointment(${a.id})" style="background:#e74c3c;font-size:12px;padding:4px 8px;">Cancel</button></td>
             </tr>
             `;
         });
