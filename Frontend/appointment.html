@@ -5,20 +5,108 @@
 <title>Appointments</title>
 
 <style>
-body{font-family:Arial;background:#f5f7fa;}
-.container{padding:30px;max-width:900px;margin:auto;}
-.box{background:white;padding:20px;border-radius:10px;margin-bottom:20px;}
-input,select,button{width:100%;padding:10px;margin:8px 0;}
-button{background:#2c7be5;color:white;border:none;cursor:pointer;border-radius:5px;}
-button:disabled{background:gray;}
-table{width:100%;background:white;border-collapse:collapse;}
-th,td{padding:10px;border-bottom:1px solid #ddd;text-align:center;}
-th{background:#2c7be5;color:white;}
-h2,h3{text-align:center;}
+body{
+    font-family:Arial;
+    background:#f5f7fa;
+    margin:0;
+}
+
+/* TOP BAR */
+.topbar{
+    display:flex;
+    justify-content:flex-end;
+    padding:15px 30px;
+}
+
+/* LOGOUT BUTTON */
+.logout{
+    background:#e74c3c;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.logout:hover{
+    background:#c0392b;
+}
+
+/* CONTAINER */
+.container{
+    padding:20px;
+    max-width:700px;   /* smaller width */
+    margin:auto;
+}
+
+/* BOX */
+.box{
+    background:white;
+    padding:18px;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* FORM */
+input,select,button{
+    width:100%;
+    padding:9px;
+    margin:6px 0;
+    font-size:14px;
+}
+
+button{
+    background:#2c7be5;
+    color:white;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+button:hover{
+    background:#1a5fd0;
+}
+
+button:disabled{
+    background:gray;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    background:white;
+    border-collapse:collapse;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+th,td{
+    padding:8px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+    font-size:14px;
+}
+
+th{
+    background:#2c7be5;
+    color:white;
+}
+
+h2,h3{
+    text-align:center;
+    margin-bottom:10px;
+}
 </style>
 </head>
 
 <body>
+
+<!-- TOP RIGHT LOGOUT -->
+<div class="topbar">
+    <button class="logout" onclick="logout()">Logout</button>
+</div>
 
 <div class="container">
 
@@ -71,6 +159,13 @@ if(!token || !user){
 
 // auto fill name
 document.getElementById("name").value = user.name;
+
+
+// ================= LOGOUT =================
+function logout(){
+    localStorage.clear();
+    window.location.href = "login.html";
+}
 
 
 // ================= BOOK =================
@@ -167,7 +262,7 @@ async function load(){
             <td>${a.doctor || "N/A"}</td>
             <td>${a.date}</td>
             <td>${a.time}</td>
-            <td><button onclick="cancelAppointment(${a.id})">Cancel</button></td>
+            <td><button onclick="cancelAppointment(${a.id})" style="background:#e74c3c;">Cancel</button></td>
             </tr>
             `;
         });
