@@ -18,7 +18,8 @@ body{
     background:white;
     padding:30px;
     border-radius:10px;
-    width:320px;
+    width:340px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.2);
 }
 
 input,select,button{
@@ -32,6 +33,19 @@ button{
     color:white;
     border:none;
     cursor:pointer;
+    border-radius:5px;
+}
+
+button:disabled{
+    background:gray;
+}
+
+.switch{
+    background:none;
+    color:#2c7be5;
+    border:none;
+    cursor:pointer;
+    margin-top:10px;
 }
 </style>
 </head>
@@ -45,7 +59,7 @@ button{
 <div id="loginBox">
     <input id="loginEmail" type="email" placeholder="Email">
     <input id="loginPassword" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
+    <button onclick="login()" id="loginBtn">Login</button>
 </div>
 
 <div id="registerBox" style="display:none;">
@@ -54,21 +68,27 @@ button{
     <input id="regPassword" type="password" placeholder="Password">
 
     <select id="regRole">
-        <option value="patient">Patient</option>
-        <option value="doctor">Doctor</option>
+        <option value="Patient">Patient</option>
+        <option value="Doctor">Doctor</option>
     </select>
 
-    <button onclick="register()">Register</button>
+    <button onclick="register()" id="regBtn">Register</button>
 </div>
 
-<button onclick="toggle()">Switch Login/Register</button>
+<button class="switch" onclick="toggle()" id="switchBtn">
+    Switch to Register
+</button>
 
 </div>
 
 <script>
 
-// ================= BASE URL =================
 const BASE_URL = "https://hospital-management-d8lo.onrender.com";
+
+// ================= AUTO REDIRECT =================
+if(localStorage.getItem("token")){
+    window.location.href = "appointment.html";
+}
 
 let isLogin = true;
 
@@ -77,12 +97,20 @@ function toggle(){
 
     document.getElementById("loginBox").style.display = isLogin ? "block" : "none";
     document.getElementById("registerBox").style.display = isLogin ? "none" : "block";
+
     document.getElementById("title").innerText = isLogin ? "Login" : "Register";
+
+    document.getElementById("switchBtn").innerText = 
+        isLogin ? "Switch to Register" : "Switch to Login";
 }
 
 
 // ================= REGISTER =================
 async function register(){
+
+    const btn = document.getElementById("regBtn");
+    btn.disabled = true;
+    btn.innerText = "Registering...";
 
     const data = {
         name: document.getElementById("regName").value.trim(),
@@ -93,6 +121,8 @@ async function register(){
 
     if(!data.name || !data.email || !data.password || !data.role){
         alert("All fields required");
+        btn.disabled = false;
+        btn.innerText = "Register";
         return;
     }
 
@@ -107,29 +137,35 @@ async function register(){
 
         if(!res.ok){
             alert(result.message || "Registration failed");
-            return;
+        } else {
+            alert("Registered Successfully");
+            toggle();
         }
-
-        alert(result.message || "Registered Successfully");
-
-        // auto switch to login
-        toggle();
 
     } catch (err) {
         alert("Server not reachable");
         console.log(err);
     }
+
+    btn.disabled = false;
+    btn.innerText = "Register";
 }
 
 
 // ================= LOGIN =================
 async function login(){
 
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+    btn.innerText = "Logging in...";
+
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
 
     if(!email || !password){
         alert("Email and password required");
+        btn.disabled = false;
+        btn.innerText = "Login";
         return;
     }
 
@@ -144,20 +180,21 @@ async function login(){
 
         if(!res.ok){
             alert(data.message || "Login failed");
-            return;
+        } else {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+
+            alert("Login Successful");
+            window.location.href = "appointment.html";
         }
 
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        alert("Login Successful");
-
-        window.location.href = "appointment.html";
-
     } catch (err) {
-        alert("Server error or backend not running");
+        alert("Server error");
         console.log(err);
     }
+
+    btn.disabled = false;
+    btn.innerText = "Login";
 }
 
 </script>

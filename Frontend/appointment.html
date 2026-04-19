@@ -6,13 +6,15 @@
 
 <style>
 body{font-family:Arial;background:#f5f7fa;}
-.container{padding:30px;}
+.container{padding:30px;max-width:900px;margin:auto;}
 .box{background:white;padding:20px;border-radius:10px;margin-bottom:20px;}
 input,select,button{width:100%;padding:10px;margin:8px 0;}
-button{background:#2c7be5;color:white;border:none;cursor:pointer;}
+button{background:#2c7be5;color:white;border:none;cursor:pointer;border-radius:5px;}
+button:disabled{background:gray;}
 table{width:100%;background:white;border-collapse:collapse;}
-th,td{padding:10px;border-bottom:1px solid #ddd;}
+th,td{padding:10px;border-bottom:1px solid #ddd;text-align:center;}
 th{background:#2c7be5;color:white;}
+h2,h3{text-align:center;}
 </style>
 </head>
 
@@ -24,7 +26,8 @@ th{background:#2c7be5;color:white;}
 
 <div class="box">
 <form id="form">
-<input id="name" placeholder="Name">
+
+<input id="name" placeholder="Name" readonly>
 
 <select id="doctor">
 <option value="Dr. Sharma">Dr. Sharma</option>
@@ -35,8 +38,11 @@ th{background:#2c7be5;color:white;}
 <input type="time" id="time">
 
 <button type="submit">Book</button>
+
 </form>
 </div>
+
+<h3>Your Appointments</h3>
 
 <table id="table">
 <tr>
@@ -53,26 +59,39 @@ th{background:#2c7be5;color:white;}
 <script>
 
 const BASE_URL = "https://hospital-management-d8lo.onrender.com";
-const token = localStorage.getItem("token");
 
-if(!token){
+// ================= AUTH CHECK =================
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if(!token || !user){
     alert("Login first");
     window.location.href = "login.html";
 }
+
+// auto fill name
+document.getElementById("name").value = user.name;
+
 
 // ================= BOOK =================
 document.getElementById("form").addEventListener("submit", async (e)=>{
     e.preventDefault();
 
+    const btn = e.target.querySelector("button");
+    btn.disabled = true;
+    btn.innerText = "Booking...";
+
     const data = {
-        name: document.getElementById("name").value.trim(),
+        name: user.name,
         doctor: document.getElementById("doctor").value,
         date: document.getElementById("date").value,
         time: document.getElementById("time").value
     };
 
-    if(!data.name || !data.date || !data.time){
+    if(!data.date || !data.time){
         alert("All fields required");
+        btn.disabled = false;
+        btn.innerText = "Book";
         return;
     }
 
@@ -88,14 +107,19 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
 
         const result = await res.json();
 
-        if(!res.ok){
-            alert(result.message || "Booking failed");
+        if(res.status === 401){
+            alert("Session expired");
+            localStorage.clear();
+            window.location.href = "login.html";
             return;
         }
 
-        alert(result.message || "Booked Successfully");
-
-        document.getElementById("form").reset();
+        if(!res.ok){
+            alert(result.message || "Booking failed");
+        } else {
+            alert(result.message || "Booked Successfully");
+            document.getElementById("form").reset();
+        }
 
         load();
 
@@ -103,6 +127,9 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
         alert("Server error");
         console.log(err);
     }
+
+    btn.disabled = false;
+    btn.innerText = "Book";
 });
 
 
@@ -113,6 +140,13 @@ async function load(){
         const res = await fetch(`${BASE_URL}/api/appointments`, {
             headers:{ "Authorization":"Bearer "+token }
         });
+
+        if(res.status === 401){
+            alert("Session expired");
+            localStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
 
         const data = await res.json();
 
@@ -146,6 +180,9 @@ async function load(){
 
 // ================= CANCEL =================
 async function cancelAppointment(id){
+
+    const confirmDelete = confirm("Cancel this appointment?");
+    if(!confirmDelete) return;
 
     try {
         await fetch(`${BASE_URL}/api/appointments/cancel/${id}`, {
