@@ -11,22 +11,17 @@ body{
     margin:0;
 }
 
-/* HEADER */
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:10px 20px;
-}
-
-/* LOGOUT BUTTON (SMALL) */
+/* LOGOUT TOP RIGHT */
 .logout{
+    position:absolute;
+    top:15px;
+    right:20px;
     background:#e74c3c;
     color:white;
     border:none;
     padding:5px 10px;
-    border-radius:4px;
     font-size:12px;
+    border-radius:4px;
     cursor:pointer;
 }
 
@@ -36,11 +31,12 @@ body{
 
 /* CONTAINER */
 .container{
-    max-width:500px;   /* tighter */
-    margin:20px auto;
+    max-width:500px;
+    margin:60px auto 20px; /* top space for logout */
+    padding:0 10px;
 }
 
-/* CARD */
+/* BOX */
 .box{
     background:white;
     padding:15px;
@@ -49,15 +45,16 @@ body{
     box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* FORM */
+/* FIX OVERFLOW */
 input,select,button{
     width:100%;
     padding:8px;
     margin:5px 0;
     font-size:13px;
+    box-sizing:border-box;  /* IMPORTANT FIX */
 }
 
-/* MAIN BUTTON */
+/* BUTTON */
 button{
     background:#2c7be5;
     color:white;
@@ -79,8 +76,6 @@ table{
     width:100%;
     background:white;
     border-collapse:collapse;
-    border-radius:8px;
-    overflow:hidden;
 }
 
 th,td{
@@ -105,10 +100,8 @@ h2,h3{
 
 <body>
 
-<div class="header">
-    <h3>Appointments</h3>
-    <button class="logout" onclick="logout()">Logout</button>
-</div>
+<!-- LOGOUT -->
+<button class="logout" onclick="logout()">Logout</button>
 
 <div class="container">
 
