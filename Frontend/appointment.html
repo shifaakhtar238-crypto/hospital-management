@@ -12,26 +12,17 @@ body{
 }
 
 /*  LOGOUT BUTTON */
-.logout{
-    position:fixed;   /* always corner */
+..logout{
+    position:fixed;
     top:10px;
     right:10px;
     background:#e74c3c;
     color:white;
     border:none;
-    width:28px;
-    height:28px;
-    border-radius:50%;
-    font-size:14px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    padding:4px 10px;   
+    font-size:12px;     
+    border-radius:4px;
     cursor:pointer;
-    box-shadow:0 2px 5px rgba(0,0,0,0.2);
-}
-
-.logout:hover{
-    background:#c0392b;
 }
 
 /* CONTAINER */
@@ -106,7 +97,7 @@ h2,h3{
 <body>
 
 <!--  LOGOUT -->
-<button class="logout" onclick="logout()">⎋</button>
+<button class="logout" onclick="logout()">Logout</button>
 
 <div class="container">
 
