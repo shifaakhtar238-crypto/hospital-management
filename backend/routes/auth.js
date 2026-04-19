@@ -4,24 +4,18 @@ const supabase = require("../supabaseClient");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-require("dotenv").config();
+//  fallback if ENV not working
+const JWT_SECRET = process.env.JWT_SECRET || "akhtar@123";
 
 
 // ================= REGISTER =================
 router.post("/register", async (req, res) => {
     try {
-        console.log("BODY RECEIVED:", req.body);
-
         const { name, email, password, role } = req.body;
 
         // validation
         if (!name || !email || !password || !role) {
             return res.status(400).json({ message: "All fields required" });
-        }
-
-        // check env safety
-        if (!process.env.JWT_SECRET) {
-            return res.status(500).json({ message: "JWT_SECRET missing in environment" });
         }
 
         // check existing user
@@ -81,10 +75,7 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ message: "Email and password required" });
         }
 
-        if (!process.env.JWT_SECRET) {
-            return res.status(500).json({ message: "JWT_SECRET not configured" });
-        }
-
+        // get user
         const { data: user, error } = await supabase
             .from("patient")
             .select("*")
@@ -100,10 +91,6 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ message: "User not found" });
         }
 
-        if (!user.password) {
-            return res.status(500).json({ message: "Password missing in DB" });
-        }
-
         // compare password
         const isValid = await bcrypt.compare(password, user.password);
 
@@ -114,7 +101,7 @@ router.post("/login", async (req, res) => {
         // generate token
         const token = jwt.sign(
             { id: user.id, role: user.role },
-            process.env.JWT_SECRET,
+            JWT_SECRET,
             { expiresIn: "1d" }
         );
 

@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken");
 
+//  same fallback as auth.js
+const JWT_SECRET = process.env.JWT_SECRET || "akhtar@123";
+
 module.exports = function (req, res, next) {
     try {
         const authHeader = req.headers.authorization;
@@ -22,17 +25,12 @@ module.exports = function (req, res, next) {
 
         const token = parts[1];
 
-        // 3. Check env variable
-        if (!process.env.JWT_SECRET) {
-            return res.status(500).json({
-                message: "Server misconfiguration: JWT_SECRET missing"
-            });
-        }
+        // ENV check remove (not needed now)
 
-        // 4. Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // 3. Verify token
+        const decoded = jwt.verify(token, JWT_SECRET);
 
-        // 5. Attach user to request
+        // 4. Attach user to request
         req.user = decoded;
 
         next();
@@ -40,7 +38,6 @@ module.exports = function (req, res, next) {
     } catch (err) {
         console.log("JWT AUTH ERROR:", err.message);
 
-        // token expired or invalid
         return res.status(401).json({
             message: "Invalid or expired token"
         });

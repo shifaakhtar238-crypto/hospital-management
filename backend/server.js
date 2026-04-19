@@ -5,22 +5,19 @@ require("dotenv").config();
 const app = express();
 
 
-// ================= SAFETY CHECK (ENV) =================
-if (!process.env.PORT) {
-    console.log("⚠️ PORT not set, using default 5000");
-}
+// ================= PORT =================
+const PORT = process.env.PORT || 5000;
 
 
 // ================= MIDDLEWARE =================
 
-// CORS (production safe)
+// CORS
 app.use(cors({
-    origin: "*", // ⚠️ deploy ke baad frontend URL daalna
+    origin: "*", // production me frontend URL daalna
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
 }));
 
-// body parser (IMPORTANT)
+// body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -49,19 +46,16 @@ app.use((req, res) => {
 
 // ================= GLOBAL ERROR HANDLER =================
 app.use((err, req, res, next) => {
-    console.error("🔥 SERVER ERROR:", err);
+    console.error("SERVER ERROR:", err.message);
 
     res.status(500).json({
         success: false,
-        message: "Internal Server Error",
-        error: err.message
+        message: "Internal Server Error"
     });
 });
 
 
 // ================= START SERVER =================
-const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
