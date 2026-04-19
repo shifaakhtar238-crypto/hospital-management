@@ -5,96 +5,20 @@
 <title>Appointments</title>
 
 <style>
-body{
-    font-family:Arial;
-    margin:0;
-    background:#f5f7fa;
-}
-
-/* NAVBAR */
-.nav{
-    background:#2c7be5;
-    padding:15px;
-    text-align:center;
-}
-
-.nav a{
-    color:white;
-    margin:0 15px;
-    text-decoration:none;
-    font-weight:bold;
-}
-
-/* CONTAINER */
-.container{
-    padding:30px;
-    max-width:900px;
-    margin:auto;
-}
-
-/* CARD */
-.box{
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    margin-bottom:20px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* FORM */
-input,select,button{
-    width:100%;
-    padding:10px;
-    margin:8px 0;
-}
-
-button{
-    background:#2c7be5;
-    color:white;
-    border:none;
-    cursor:pointer;
-    border-radius:5px;
-}
-
-button:hover{
-    background:#1a5fd0;
-}
-
-button:disabled{
-    background:gray;
-}
-
-/* TABLE */
-table{
-    width:100%;
-    background:white;
-    border-collapse:collapse;
-}
-
-th,td{
-    padding:10px;
-    border-bottom:1px solid #ddd;
-    text-align:center;
-}
-
-th{
-    background:#2c7be5;
-    color:white;
-}
-
-h2,h3{
-    text-align:center;
-}
+body{font-family:Arial;background:#f5f7fa;}
+.container{padding:30px;max-width:900px;margin:auto;}
+.box{background:white;padding:20px;border-radius:10px;margin-bottom:20px;}
+input,select,button{width:100%;padding:10px;margin:8px 0;}
+button{background:#2c7be5;color:white;border:none;cursor:pointer;border-radius:5px;}
+button:disabled{background:gray;}
+table{width:100%;background:white;border-collapse:collapse;}
+th,td{padding:10px;border-bottom:1px solid #ddd;text-align:center;}
+th{background:#2c7be5;color:white;}
+h2,h3{text-align:center;}
 </style>
 </head>
 
 <body>
-
-<!-- NAVBAR -->
-<div class="nav">
-    <a href="index.html">Home</a>
-    <a href="appointment.html">Appointment</a>
-</div>
 
 <div class="container">
 
@@ -140,15 +64,13 @@ const BASE_URL = "https://hospital-management-d8lo.onrender.com";
 const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user"));
 
-if(!token){
+if(!token || !user){
     alert("Login first");
     window.location.href = "login.html";
 }
 
 // auto fill name
-if(user){
-    document.getElementById("name").value = user.name;
-}
+document.getElementById("name").value = user.name;
 
 
 // ================= BOOK =================
@@ -160,13 +82,13 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     btn.innerText = "Booking...";
 
     const data = {
-        name: document.getElementById("name").value,
+        name: user.name,
         doctor: document.getElementById("doctor").value,
         date: document.getElementById("date").value,
         time: document.getElementById("time").value
     };
 
-    if(!data.name || !data.date || !data.time){
+    if(!data.date || !data.time){
         alert("All fields required");
         btn.disabled = false;
         btn.innerText = "Book";
@@ -185,14 +107,19 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
 
         const result = await res.json();
 
-        if(!res.ok){
-            alert(result.message || "Booking failed");
+        if(res.status === 401){
+            alert("Session expired");
+            localStorage.clear();
+            window.location.href = "login.html";
             return;
         }
 
-        alert(result.message || "Booked Successfully");
-
-        document.getElementById("form").reset();
+        if(!res.ok){
+            alert(result.message || "Booking failed");
+        } else {
+            alert(result.message || "Booked Successfully");
+            document.getElementById("form").reset();
+        }
 
         load();
 
@@ -214,6 +141,13 @@ async function load(){
             headers:{ "Authorization":"Bearer "+token }
         });
 
+        if(res.status === 401){
+            alert("Session expired");
+            localStorage.clear();
+            window.location.href = "login.html";
+            return;
+        }
+
         const data = await res.json();
 
         const table = document.getElementById("table");
@@ -233,11 +167,7 @@ async function load(){
             <td>${a.doctor || "N/A"}</td>
             <td>${a.date}</td>
             <td>${a.time}</td>
-            <td>
-                <button onclick="cancelAppointment(${a.id})" style="background:red;">
-                    Cancel
-                </button>
-            </td>
+            <td><button onclick="cancelAppointment(${a.id})">Cancel</button></td>
             </tr>
             `;
         });
